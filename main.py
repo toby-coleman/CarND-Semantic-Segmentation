@@ -5,6 +5,8 @@ import warnings
 from distutils.version import LooseVersion
 import project_tests as tests
 
+from video import convert_video
+
 # Define some settings
 _keep_prob = 0.9
 _lr = 0.001
@@ -149,7 +151,7 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
             total_loss += loss
         print('Epoch {0}: Avg loss = {1}'.format(epoch + 1, total_loss / n_batch))
         if saver:
-            saver.save(sess, './checkpoint_models', global_step=(epoch + 1))
+            saver.save(sess, './checkpoint_models/mdl', global_step=(epoch + 1))
 tests.test_train_nn(train_nn)
 
 
@@ -192,7 +194,7 @@ def run():
         sess.run(init)
         try:
             train_nn(sess, _epochs, _batch_size, get_batches_fn, op, loss, input_image,
-                     correct_label, keep_prob, lr)
+                     correct_label, keep_prob, lr, saver)
         except KeyboardInterrupt:
             print('Training stopped early')
 
@@ -201,6 +203,9 @@ def run():
                                       image_shape, logits, keep_prob, input_image)
 
         # OPTIONAL: Apply the trained model to a video
+        print('Processing video')
+        convert_video(sess, logits, keep_prob, input_image, image_shape,
+                      'video/test_video.mp4')
 
 
 if __name__ == '__main__':
